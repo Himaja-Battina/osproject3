@@ -1,0 +1,30 @@
+pipeline {
+    agent any
+    stages {
+        stage('Deploy Application') {
+            steps {
+                
+                    // Configure RHACM credentials
+                    withCredentials([string(credentialsId: 'rhacm-server-url', variable: 'RHACM_SERVER_URL'),
+                                      string(credentialsId: 'rhacm-auth-token', variable: 'RHACM_AUTH_TOKEN')]) {
+                        
+                        // Deploy application to  clusters using RHACM API
+                        sh "curl -H 'Authorization: Bearer ${RHACM_AUTH_TOKEN}' ${RHACM_SERVER_URL}/apis/cluster.open-cluster-management.io/v1/managedclusters > managed-clusters.json"
+                        def managedClustersJson = readJSON file: 'managed-clusters.json'
+                        for (def cluster : managedClustersJson.items) {
+                            try {
+                                
+                                    sh "oc --server=${cluster.status.apiServerURL} --token=${cluster.spec.secretRef.name}:${cluster.spec.secretRef.namespace}:${RHACM_AUTH_TOKEN} apply -f application-deployment.yaml"
+                                    // Break out of loop if deployment is successful
+                                    break
+                                
+                            } catch (Exception e) {
+                                // Log error and continue to next cluster
+                                echo "Deployment failed on ${cluster.metadata.name}. Error: ${e}"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
