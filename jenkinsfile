@@ -9,7 +9,7 @@ pipeline {
                                       string(credentialsId: 'rhacm-auth-token', variable: 'RHACM_AUTH_TOKEN')]) {
                         script{
                         // Deploy application to  clusters using RHACM API
-                         sh 'curl -H 'Authorization: Bearer ${RHACM_AUTH_TOKEN}' ${RHACM_SERVER_URL}/apis/cluster.open-cluster-management.io/v1/managedclusters > managed-clusters.json'
+                         sh "curl -H 'Authorization: Bearer $RHACM_AUTH_TOKEN' $RHACM_SERVER_URL/apis/cluster.open-cluster-management.io/v1/managedclusters > managed-clusters.json"
                         def managedClustersJson = readJSON file: 'managed-clusters.json'
                         for (def cluster : managedClustersJson.items) {
                             try {
