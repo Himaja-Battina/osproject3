@@ -14,7 +14,7 @@ pipeline {
                         for (def cluster : managedClustersJson.items) {
                             try {
                                 
-                                    sh 'oc --server=$cluster.status.apiServerURL --token=$cluster.spec.secretRef.name:$cluster.spec.secretRef.namespace:$RHACM_AUTH_TOKEN apply -f application-deployment.yaml"
+                                    sh 'oc --server=$cluster.status.apiServerURL --token=$cluster.spec.secretRef.name:$cluster.spec.secretRef.namespace:$RHACM_AUTH_TOKEN apply -f application-deployment.yaml'
                                     // Break out of loop if deployment is successful
                                     break
                                 
